@@ -1,8 +1,8 @@
 import originJSONP from 'jsonp' // 引入了第三方jsonp库
 
-export default function jsonp(url, data, optipon) { // 用 Promise 封装一个jsonp方法 对外暴露 
+export default function jsonp(url, data, optipon) { // 用Promise封装一个jsonp 方法对外暴露
   url += (url.indexOf('?') < 0 ? '?' : '&') + param(data)
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => { // Promise向后端发送请求
     originJSONP(url, optipon, (err, data) => {
       if (!err) {
         resolve(data)

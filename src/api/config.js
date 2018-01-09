@@ -1,4 +1,4 @@
-export const commonParams = {
+export const commonParams = { // 公共jsonp参数
   g_tk: 1928093487,
   inCharset: 'utf-8',
   outCharset: 'utf-8',
@@ -6,7 +6,7 @@ export const commonParams = {
   format: 'jsonp'
 }
 
-export const options = {
+export const options = { // jsonp公共回调param
   param: 'jsonpCallback'
 }
 
