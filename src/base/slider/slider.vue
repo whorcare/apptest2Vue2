@@ -111,6 +111,9 @@
           this.slider.goToPage(pageIndex, 0, 400) // BScroll 的 goToPage 方法 跳转至某一页
         }, this.interval)
       }
+    },
+    destroyed() { // Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+      clearTimeout(this.timer)
     }
   }
 </script>
