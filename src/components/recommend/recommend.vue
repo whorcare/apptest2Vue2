@@ -14,7 +14,15 @@
       <div class="recommend-list">
         <h1 class="list-title">热门歌单推荐</h1>
         <ul>
-
+          <li v-for="item in discList" class="item">
+            <div class="icon">
+              <img width="60" height="60" :src="item.imgurl">
+            </div>
+            <div class="text">
+              <h2 class="name">{{item.creator.name}}</h2>
+              <p class="desc">{{item.dissname}}</p>
+            </div>
+          </li>
         </ul>
       </div>
     </div>
@@ -29,7 +37,8 @@
   export default {
     data() {
       return {
-        recommends: [] // 轮播图数据
+        recommends: [], // 轮播图数据
+        discList: [] // 歌单数据
       }
     },
     created() {
@@ -47,7 +56,7 @@
       _getDiscList() { // 获取歌曲列表数据
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.data.list)
+            this.discList = res.data.list
           }
         })
       }
