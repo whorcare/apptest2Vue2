@@ -1,13 +1,14 @@
 <template>
   <div class="recommend">
-    <scroll class="recommend-content" :data="discList">
+    <scroll ref="scroll" class="recommend-content" :data="discList">
       <div>
         <!-- 用 v-if 先将数据加载完成后再加载DOM-->
         <div v-if="recommends.length" class="slider-wrapper">
           <slider>
             <div v-for="item in recommends">
               <a :href="item.linkUrl">
-                <img :src="item.picUrl">
+                <!--监听图片加载是否完成-->
+                <img @load="loadImage" :src="item.picUrl">
               </a>
             </div>
           </slider>
@@ -62,6 +63,12 @@
             this.discList = res.data.list
           }
         })
+      },
+      loadImage() { // 监听图片加载完成 重新计算better-scroll高度
+        if (!this.checkLoaded) { // 多张图片只对一张进行 计算 避免计算浪费
+          this.$refs.scroll.refresh()
+          this.checkLoaded = true
+        }
       }
     },
     components: {
