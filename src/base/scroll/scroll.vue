@@ -20,6 +20,10 @@
       data: { // 数据
         type: Array,
         default: null
+      },
+      listenScroll: { // 是否监听滚动事件
+        type: Boolean,
+        default: false
       }
     },
     mounted() { // 当组件ready钩子
@@ -36,6 +40,13 @@
           probeType: this.probeType,
           click: this.click
         })
+
+        if (this.listenScroll) { // 如果需要监听scroll的滚动事件
+          let that = this
+          this.scroll.on('scroll', (pos) => { // 内置API 拿到pos
+            that.$emit('scroll', pos) // $emit向外部派发事件
+          })
+        }
       },
       // BScroll方法代理
       enable() { // 启用 better-scroll，默认开启

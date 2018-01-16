@@ -1,6 +1,6 @@
 <template>
-  <!--歌手列表组件-->
-  <scroll class="listview" :data="data" ref="listview">
+  <!-- 歌手列表组件 @scroll为接收scroll组件传出来的事件 -->
+  <scroll class="listview" :data="data" ref="listview" :listenScroll="listenScroll" :probeType="probeType" @scroll="scroll">
     <ul>
       <!--双重循环-->
       <li v-for="group in data" class="list-group" ref="listGroup">
@@ -17,7 +17,7 @@
     <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
       <ul>
         <!--通过 index 索引 获取点击的是第几个元素-->
-        <li v-for="(item, index) in shortcutList" class="item" :data-index="index">
+        <li v-for="(item, index) in shortcutList" class="item" :class="{'current': currentIndex === index}" :data-index="index">
           {{item}}
         </li>
       </ul>
@@ -35,6 +35,15 @@
   export default {
     created() {
       this.touch = {} // 为位置滚动设置一个空对象 用来记录值
+      this.listenScroll = true // 是否监听 scroll组件 的 滚动值 传入到scroll组件中
+      this.listHeight = [] // 高度数组 会将 每一个歌手分类的高度存入到 数组中
+      this.probeType = 3 // 传给scroll组件 的滚动监听模式选择
+    },
+    data() {
+      return {
+        scrollY: -1, // 歌手列表 y位置 数据
+        currentIndex: 0 // 当前应该显示的 a-z 第几个 高亮 默认0为第一个高亮
+      }
     },
     props: {
       data: { // 接收歌手列表数据
@@ -66,8 +75,43 @@
 
         this._scrollTo(anchorIndex)
       },
+      scroll(pos) { // 为接收scroll组件传出来的事件  pos => better-scroll 传出的数据
+        this.scrollY = pos.y
+      },
       _scrollTo(index) { // 再次封装滚动方法
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // listGroup 为多个 <li> 取其索引 [index]
+      },
+      _calculateHeight() { // 计算 scroll歌手列表 每个歌手group（分类） 的高度
+        this.listHeight = []
+        const list = this.$refs.listGroup
+        let height = 0
+        this.listHeight.push(height)
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i] // 得到每个group（歌手分类）的元素（DOM）
+          height += item.clientHeight // dom可以直接获取高度 高度累加
+          this.listHeight.push(height)
+        }
+      }
+    },
+    watch: {
+      data() {
+        setTimeout(() => {
+          this._calculateHeight()
+        }, 20)
+      },
+      scrollY(newY) { // 将 scrollY => 当前滚动到的y值（像素） 与 listHeight => 区间高度集合数组 进行比较 确定在哪个scrollY滚动到了哪个区间
+        const listHeight = this.listHeight
+        // 遍历进行 scrollY 与 listHeight => []中的每个元素进行 上限 下限 的对比
+        for (let i = 0; i < listHeight.length; i++) {
+          let height1 = listHeight[i]
+          let height2 = listHeight[i + 1]
+          if (!height2 || (-newY > height1 && -newY < height2)) {
+            this.currentIndex = i // currentIndex => 索引
+            console.log(this.currentIndex)
+            return
+          }
+        }
+        this.currentIndex = 0
       }
     },
     components: {
