@@ -1,9 +1,9 @@
 <template>
   <!--歌手列表组件-->
-  <scroll class="listview" :data="data">
+  <scroll class="listview" :data="data" ref="listview">
     <ul>
       <!--双重循环-->
-      <li v-for="group in data" class="list-group">
+      <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
           <li v-for="item in group.items" class="list-group-item">
@@ -13,19 +13,61 @@
         </ul>
       </li>
     </ul>
+    <!--右侧A-Z栏  touchstart点击事件 touchmove手指滑动事件 -->
+    <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
+      <ul>
+        <!--通过 index 索引 获取点击的是第几个元素-->
+        <li v-for="(item, index) in shortcutList" class="item" :data-index="index">
+          {{item}}
+        </li>
+      </ul>
+    </div>
   </scroll>
 </template>
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
-//  import {getData} from 'common/js/dom'
+  import {getData} from 'common/js/dom'
+
+  const ANCHOR_HEIGHT = 18
 
   export default {
+    created() {
+      this.touch = {} // 为位置滚动设置一个空对象 用来记录值
+    },
     props: {
       data: { // 接收歌手列表数据
         type: Array,
         default: []
+      }
+    },
+    computed: { // 计算属性用于代替复杂的 <div>{{}}</div>
+      shortcutList() { // 获取data歌手列表数据中的 title => A-Z 的集合数组
+        return this.data.map((group) => { // map 也就是原数组被“映射”成对应新数组。
+          return group.title.substr(0, 1)
+        })
+      }
+    },
+    methods: {
+      onShortcutTouchStart(e) { // A-Z 触摸点击事件 点击后让scroll滚动到相应的位置
+        let anchorIndex = getData(e.target, 'index') // 获取其index索引
+        let firstTouch = e.touches[0]
+        this.touch.y1 = firstTouch.pageY
+        this.touch.anchorIndex = anchorIndex
+
+        this._scrollTo(anchorIndex)
+      },
+      onShortcutTouchMove(e) { // 手指滑动事件 计算从start到滚动到的位置差（y值差） 计算滚动到哪里
+        let firstTouch = e.touches[0]
+        this.touch.y2 = firstTouch.pageY
+        let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0 // 在y轴上的偏移量（像素）除以/18像素（ 每个A-Z之间的间隔 ）得出 偏移多少个元素 再取整
+        let anchorIndex = parseInt(this.touch.anchorIndex) + delta
+
+        this._scrollTo(anchorIndex)
+      },
+      _scrollTo(index) { // 再次封装滚动方法
+        this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // listGroup 为多个 <li> 取其索引 [index]
       }
     },
     components: {

@@ -46,6 +46,13 @@
       },
       refresh() { // 当 better-scroll 刷新时触发
         this.scroll && this.scroll.refresh()
+      },
+      scrollTo() { // 让 better-scroll 使用封装好的内置API => scrollTo 滚动到相应的位置（坐标）
+        // 用apply 将 scrollTo() 的参数传递到 better-scroll 中 scrollTo 的方法里
+        this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments) // apply(this对象上下文, arguments)
+      },
+      scrollToElement() { // 滚动到某个元素
+        this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
       }
     },
     watch: {
