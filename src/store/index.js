@@ -1,3 +1,4 @@
+/** VUEX 入口 **/
 import Vue from 'vue'
 import Vuex from 'vuex'
 import * as actions from './actions'
