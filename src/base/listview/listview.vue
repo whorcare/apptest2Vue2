@@ -23,8 +23,12 @@
       </ul>
     </div>
     <!-- A-Z 可变标题 -->
-    <div class="list-fixed" v-show="fixedTitle">
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
+    <!--loading-->
+    <div v-show="!data.length" class="loading-container">
+      <loading></loading>
     </div>
   </scroll>
 </template>
@@ -35,6 +39,7 @@
   import {getData} from 'common/js/dom'
 
   const ANCHOR_HEIGHT = 18
+  const TITLE_HEIGHT = 30
 
   export default {
     created() {
@@ -46,7 +51,8 @@
     data() {
       return {
         scrollY: -1, // 歌手列表 y位置 数据
-        currentIndex: 0 // 当前应该显示的 a-z 第几个 高亮 默认0为第一个高亮
+        currentIndex: 0, // 当前应该显示的 a-z 第几个 高亮 默认0为第一个高亮
+        diff: -1 // a-z 标题动画偏差值
       }
     },
     props: {
@@ -131,11 +137,20 @@
           let height2 = listHeight[i + 1]
           if (-newY >= height1 && -newY < height2) {
             this.currentIndex = i // currentIndex => 索引
+            this.diff = height2 + newY
             return
           }
         }
         // 当滚动到底部 且-newY大于最后一个元素的上限
         this.currentIndex = listHeight.length - 2
+      },
+      diff(newVal) { // 观察diff
+        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+        if (this.fixedTop === fixedTop) {
+          return
+        }
+        this.fixedTop = fixedTop
+        this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
       }
     },
     components: {
