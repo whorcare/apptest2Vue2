@@ -22,6 +22,10 @@
         </li>
       </ul>
     </div>
+    <!-- A-Z 可变标题 -->
+    <div class="list-fixed" v-show="fixedTitle">
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
   </scroll>
 </template>
 
@@ -56,6 +60,12 @@
         return this.data.map((group) => { // map 也就是原数组被“映射”成对应新数组。
           return group.title.substr(0, 1)
         })
+      },
+      fixedTitle() { // A-Z标题
+        if (this.scrollY > 0) { // 边界条件判断
+          return ''
+        }
+        return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
       }
     },
     methods: {
