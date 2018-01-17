@@ -79,6 +79,15 @@
         this.scrollY = pos.y
       },
       _scrollTo(index) { // 再次封装滚动方法
+        if (!index && index !== 0) {
+          return
+        }
+        if (index < 0) { // 滑动边界条件处理预防
+          index = 0
+        } else if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2
+        }
+        this.scrollY = -this.listHeight[index] // 点击 a-z 切换高亮
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // listGroup 为多个 <li> 取其索引 [index]
       },
       _calculateHeight() { // 计算 scroll歌手列表 每个歌手group（分类） 的高度
@@ -101,17 +110,22 @@
       },
       scrollY(newY) { // 将 scrollY => 当前滚动到的y值（像素） 与 listHeight => 区间高度集合数组 进行比较 确定在哪个scrollY滚动到了哪个区间
         const listHeight = this.listHeight
-        // 遍历进行 scrollY 与 listHeight => []中的每个元素进行 上限 下限 的对比
-        for (let i = 0; i < listHeight.length; i++) {
+        // 当滚动到顶部，newY > 0
+        if (newY > 0) {
+          this.currentIndex = 0
+          return
+        }
+        // 在中间部分滚动时 遍历进行 scrollY 与 listHeight => []中的每个元素进行 上限 下限 的对比
+        for (let i = 0; i < listHeight.length - 1; i++) {
           let height1 = listHeight[i]
           let height2 = listHeight[i + 1]
-          if (!height2 || (-newY > height1 && -newY < height2)) {
+          if (-newY >= height1 && -newY < height2) {
             this.currentIndex = i // currentIndex => 索引
-            console.log(this.currentIndex)
             return
           }
         }
-        this.currentIndex = 0
+        // 当滚动到底部 且-newY大于最后一个元素的上限
+        this.currentIndex = listHeight.length - 2
       }
     },
     components: {
