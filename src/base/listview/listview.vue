@@ -6,7 +6,7 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item in group.items" class="list-group-item">
+          <li @click="selectItem(item)" v-for="item in group.items" class="list-group-item">
             <img class="avatar"  v-lazy="item.avatar">
             <span class="name">{{item.name}}</span>
           </li>
@@ -75,6 +75,9 @@
       }
     },
     methods: {
+      selectItem(item) { // 向外部派发事件（跳转至歌曲详情页）
+        this.$emit('select', item)
+      },
       onShortcutTouchStart(e) { // A-Z 触摸点击事件 点击后让scroll滚动到相应的位置
         let anchorIndex = getData(e.target, 'index') // 获取其index索引
         let firstTouch = e.touches[0]

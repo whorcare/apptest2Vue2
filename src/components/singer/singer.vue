@@ -1,6 +1,7 @@
 <template>
   <div class="singer">
-    <list-view :data="singers"></list-view>
+    <list-view :data="singers" @select="selectSinger"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -23,6 +24,12 @@
       this._getSingerList()
     },
     methods: {
+      selectSinger(singer) { // 跳转至歌曲详情页
+        console.log(1)
+        this.$router.push({ // 跳转 并传入router中 singer.id  路由跳转实际上并没有换一个新页面 只是盖上一个层
+          path: `/singer/${singer.id}`
+        })
+      },
       _getSingerList() { // 获取歌手列表数据
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
