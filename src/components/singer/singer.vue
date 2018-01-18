@@ -10,6 +10,7 @@
   import {ERR_OK} from 'api/config'
   import Singer from 'common/js/singer'
   import ListView from 'base/listview/listview'
+  import {mapMutations} from 'vuex' // vuex 语法糖 改变数据
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LEN = 10
@@ -25,10 +26,10 @@
     },
     methods: {
       selectSinger(singer) { // 跳转至歌曲详情页
-        console.log(1)
         this.$router.push({ // 跳转 并传入router中 singer.id  路由跳转实际上并没有换一个新页面 只是盖上一个层
           path: `/singer/${singer.id}`
         })
+        this.setSinger(singer) // vuex语法糖简化版 this.$store.commit('SET_SINGER')
       },
       _getSingerList() { // 获取歌手列表数据
         getSingerList().then((res) => {
@@ -81,7 +82,11 @@
         })
         // 将热门与普通数据拼接在一起
         return hot.concat(ret)
-      }
+      },
+      // ...将一个数组，变为参数序列
+      ...mapMutations({ // 映射 你可以在组件中使用 this.$store.commit('xxx') 提交 mutation，或者使用 mapMutations 辅助函数将组件中的 methods 映射为 store.commit 调用（需要在根节点注入 store）。
+        setSinger: 'SET_SINGER' // 映射 this.setSinger() 为 this.$store.commit('SET_SINGER')
+      })
     },
     components: {
       ListView

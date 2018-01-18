@@ -5,7 +5,18 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {mapGetters} from 'vuex'
 
+  export default {
+    computed: { // getters 最终映射的就是计算属性 mapGetters需要在计算属性中写
+      ...mapGetters([ // mapGetters实际是数组   mapMutations是对象
+        'singer' // 此时 vuex 挂载了singer实例 此组件可以获取singer了
+      ])
+    },
+    created() {
+      console.log(this.singer)
+    }
+  }
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
