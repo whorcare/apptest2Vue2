@@ -1,4 +1,4 @@
-<!-- 多个 歌曲详情组件 -->
+<!-- 多个使用的 歌曲详情组件 -->
 <template>
   <div class="music-list">
     <div class="back">
@@ -8,7 +8,9 @@
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="filter"></div>
     </div>
-    <scroll :data="songs" class="list" ref="list">
+    <!--todo 向上推动时需要的层 layer -->
+    <div class="bg-layer" ref="layer"></div>
+    <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
@@ -19,6 +21,8 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
+
+  const RESERVER_HEIGHT = 40 // 顶部title高度
 
   export default {
     props: {
@@ -35,13 +39,35 @@
         default: ''
       }
     },
+    data() {
+      return {
+        scrollY: 0 // scroll偏移量
+      }
+    },
     computed: {
       bgStyle() { // 背景图片的style
         return `background-image: url(${this.bgImage})`
       }
     },
+    created() {
+      this.probeType = 3 // 用于scroll参数
+      this.listenScroll = true
+    },
     mounted() { // el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子
-      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px` // ??? 将scroll组件top值改写 让scroll组件上方的bgImage出现
+      this.imageHeight = this.$refs.bgImage.clientHeight // 记录最高滚动高度
+      this.minTranslateY = -this.imageHeight + RESERVER_HEIGHT
+      this.$refs.list.$el.style.top = `${this.imageHeight}px` // ??? 将scroll组件top值改写 让scroll组件上方的bgImage出现
+    },
+    methods: {
+      scroll(pos) { // 接收scroll的监听事件
+        this.scrollY = pos.y
+      }
+    },
+    watch: {
+      scrollY(newY) { // 监听watch偏移量 来设置DOM layer 的偏移量
+        let translateY = Math.max(this.minTranslateY, newY) // 最多偏移量 不让其偏移超出顶部
+        this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
+      }
     },
     components: {
       Scroll,
