@@ -8,8 +8,14 @@
   import {mapGetters} from 'vuex'
   import {getSingerDetail} from 'api/singer'
   import {ERR_OK} from 'api/config'
+  import {createSong} from 'common/js/song'
 
   export default {
+    data() {
+      return {
+        songs: [] // 歌曲数据
+      }
+    },
     computed: { // getters 最终映射的就是计算属性 mapGetters需要在计算属性中写
       ...mapGetters([ // mapGetters实际是数组   mapMutations是对象
         'singer' // 此时 vuex 挂载了singer实例 此组件可以获取singer了
@@ -26,9 +32,20 @@
         }
         getSingerDetail(this.singer.id).then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.data.list)
+            this.songs = this._normalizeSongs(res.data.list)
+            console.log(this.songs)
           }
         })
+      },
+      _normalizeSongs(list) { // 对数据进行处理
+        let ret = []
+        list.forEach((item) => {
+          let {musicData} = item // 解构
+          if (musicData.songid && musicData.albummid) {
+            ret.push(createSong(musicData))
+          }
+        })
+        return ret
       }
     }
   }
