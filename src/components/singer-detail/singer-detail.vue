@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <div class="singer-detail"></div>
+    <music-list :songs="songs" :title="title" :bg-image="bgImage"></music-list>
   </transition>
 </template>
 
@@ -9,6 +9,7 @@
   import {getSingerDetail} from 'api/singer'
   import {ERR_OK} from 'api/config'
   import {createSong} from 'common/js/song'
+  import musicList from 'components/music-list/music-list'
 
   export default {
     data() {
@@ -19,7 +20,13 @@
     computed: { // getters 最终映射的就是计算属性 mapGetters需要在计算属性中写
       ...mapGetters([ // mapGetters实际是数组   mapMutations是对象
         'singer' // 此时 vuex 挂载了singer实例 此组件可以获取singer了
-      ])
+      ]),
+      title() {
+        return this.singer.name
+      },
+      bgImage() {
+        return this.singer.avatar
+      }
     },
     created() {
       this._getDetail()
@@ -47,20 +54,14 @@
         })
         return ret
       }
+    },
+    components: {
+      musicList
     }
   }
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  .singer-detail
-    position: fixed
-    z-index: 100
-    top: 0
-    left: 0
-    bottom: 0
-    right: 0
-    background: #000
-
   .slide-enter-active, .slide-leave-active
     transition: all 0.3s
 
