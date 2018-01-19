@@ -5,13 +5,21 @@
       <i class="icon-back"></i>
     </div>
     <h1 class="title">{{title}}</h1>
-    <div class="bg-image" :style="bgStyle">
+    <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="filter"></div>
     </div>
+    <scroll :data="songs" class="list" ref="list">
+      <div class="song-list-wrapper">
+        <song-list :songs="songs"></song-list>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import Scroll from 'base/scroll/scroll'
+  import SongList from 'base/song-list/song-list'
+
   export default {
     props: {
       bgImage: { // 背景图
@@ -31,6 +39,13 @@
       bgStyle() { // 背景图片的style
         return `background-image: url(${this.bgImage})`
       }
+    },
+    mounted() { // el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子
+      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px` // ??? 将scroll组件top值改写 让scroll组件上方的bgImage出现
+    },
+    components: {
+      Scroll,
+      SongList
     }
   }
 </script>
