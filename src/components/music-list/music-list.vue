@@ -22,7 +22,7 @@
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
 
-  const RESERVED_HEIGHT = 40 // 顶部title高度
+  const RESERVER_HEIGHT = 40 // 顶部title高度
 
   export default {
     props: {
@@ -55,7 +55,7 @@
     },
     mounted() { // el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子
       this.imageHeight = this.$refs.bgImage.clientHeight // 记录最高滚动高度
-      this.minTransalteY = -this.imageHeight + RESERVED_HEIGHT
+      this.minTranslateY = -this.imageHeight + RESERVER_HEIGHT
       this.$refs.list.$el.style.top = `${this.imageHeight}px` // ??? 将scroll组件top值改写 让scroll组件上方的bgImage出现
     },
     methods: {
@@ -65,19 +65,8 @@
     },
     watch: {
       scrollY(newY) { // 监听watch偏移量 来设置DOM layer 的偏移量
-        let translateY = Math.max(this.minTransalteY, newY) // 最多偏移量 不让其偏移超出顶部
-        let zIndex = 0
+        let translateY = Math.max(this.minTranslateY, newY) // 最多偏移量 不让其偏移超出顶部
         this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
-        this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`
-        if (newY < this.minTransalteY) { // 滚动到顶部时
-          zIndex = 10
-          this.$refs.bgImage.style.paddingTop = 0
-          this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`
-        } else {
-          this.$refs.bgImage.style.paddingTop = '70%'
-          this.$refs.bgImage.style.height = 0
-        }
-        this.$refs.bgImage.style.zIndex = zIndex
       }
     },
     components: {
