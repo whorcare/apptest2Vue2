@@ -21,8 +21,12 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
+  import {prefixStyle} from 'common/js/dom'
 
   const RESERVED_HEIGHT = 40 // 顶部title高度
+  // 返回拼接好的css属性名
+  const transform = prefixStyle('transform')
+  const backdrop = prefixStyle('backdrop-filter')
 
   export default {
     props: {
@@ -69,8 +73,7 @@
         let zIndex = 0
         let scale = 1
         let blur = 0 // 高斯模糊
-        this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
-        this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`
+        this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`
         const percent = Math.abs(newY / this.imageHeight) // 下拉图片缩放公式
         if (newY > 0) { // 向下拉时
           scale = 1 + percent
@@ -78,8 +81,7 @@
         } else {
           blur = Math.min(20 * percent, 20) // 高斯模糊比例 最大不超过20
         }
-        this.$refs.filter.style['backdrop-filter'] = `blur(${blur})` // 模糊只能在IOS上显示效果
-        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur})`
+        this.$refs.filter.style[backdrop] = `blur(${blur})` // 模糊只能在IOS上显示效果
         if (newY < this.minTransalteY) { // 滚动到顶部时
           zIndex = 10
           this.$refs.bgImage.style.paddingTop = 0
@@ -89,8 +91,7 @@
           this.$refs.bgImage.style.height = 0
         }
         this.$refs.bgImage.style.zIndex = zIndex
-        this.$refs.bgImage.style['transform'] = `scale(${scale})`
-        this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
+        this.$refs.bgImage.style[transform] = `scale(${scale})`
       }
     },
     components: {

@@ -22,3 +22,33 @@ export function getData(el, name, val) { // 将el DOM对象添加 data- 属性 �
     return el.getAttribute(name) // getAttribute() 方法返回指定属性名的属性值
   }
 }
+
+let elementStyle = document.createElement('div').style // 能力检测
+
+let vendor = (() => { // 判断是哪个浏览器内核对应的 （供应商）
+  let transformNames = {
+    webkit: 'webkitTransform',
+    Moz: 'MozTransform',
+    O: 'OTransform',
+    ms: 'msTransform',
+    standard: 'transform'
+  }
+
+  for (let key in transformNames) {
+    if (elementStyle[transformNames[key]] !== undefined) {
+      return key
+    }
+  }
+
+  return false
+})()
+
+export function prefixStyle(style) { // 暴露一个fun 判断供应商选择 对应的属性名开头前缀
+  if (vendor === false) { // 都不支持说明浏览器有问题
+    return false
+  }
+  if (vendor === 'standard') {
+    return style
+  }
+  return vendor + style.charAt(0).toUpperCase() + style.substr(1)
+}
