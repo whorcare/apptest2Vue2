@@ -6,7 +6,7 @@
     </div>
     <h1 class="title">{{title}}</h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
-      <div class="filter"></div>
+      <div class="filter" ref="filter"></div>
     </div>
     <!--todo 向上推动时需要的层 layer -->
     <div class="bg-layer" ref="layer"></div>
@@ -67,8 +67,19 @@
       scrollY(newY) { // 监听watch偏移量 来设置DOM layer 的偏移量
         let translateY = Math.max(this.minTransalteY, newY) // 最多偏移量 不让其偏移超出顶部
         let zIndex = 0
+        let scale = 1
+        let blur = 0 // 高斯模糊
         this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
         this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`
+        const percent = Math.abs(newY / this.imageHeight) // 下拉图片缩放公式
+        if (newY > 0) { // 向下拉时
+          scale = 1 + percent
+          zIndex = 10
+        } else {
+          blur = Math.min(20 * percent, 20) // 高斯模糊比例 最大不超过20
+        }
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur})` // 模糊只能在IOS上显示效果
+        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur})`
         if (newY < this.minTransalteY) { // 滚动到顶部时
           zIndex = 10
           this.$refs.bgImage.style.paddingTop = 0
@@ -78,6 +89,8 @@
           this.$refs.bgImage.style.height = 0
         }
         this.$refs.bgImage.style.zIndex = zIndex
+        this.$refs.bgImage.style['transform'] = `scale(${scale})`
+        this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
       }
     },
     components: {
