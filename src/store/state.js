@@ -5,7 +5,7 @@ import {playMode} from 'common/js/config' // 配置信息
 const state = {
   singer: {}, // 歌手的 歌曲列表 详情
   playing: false, // 播放状态 是否在播放中
-  fullScrenn: false, // 全屏 展开和收起 播放器
+  fullScreen: false, // 全屏 展开和收起 播放器
   playlist: [], // 播放列表
   sequenceList: [], // 正常的顺序列表
   mode: playMode.sequence, // 播放模式 引入常量 sequence=>0正序播放  loop=>1循环播放  random=>2随机播放

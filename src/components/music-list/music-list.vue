@@ -19,7 +19,7 @@
     <div class="bg-layer" ref="layer"></div>
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list @select="selectItem" :songs="songs"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -33,6 +33,7 @@
   import SongList from 'base/song-list/song-list'
   import Loading from 'base/loading/loading'
   import {prefixStyle} from 'common/js/dom'
+  import {mapActions} from 'vuex'
 
   const RESERVED_HEIGHT = 40 // 顶部title高度
   // 返回拼接好的css属性名
@@ -79,7 +80,16 @@
       },
       back() { // 返回上一页
         this.$router.back()
-      }
+      },
+      selectItem(item, index) { // 点击进入歌曲播放页 接收song-list派发事件 item=>点击的歌曲 index=>索引
+        this.selectPlay({
+          list: this.songs,
+          index
+        })
+      },
+      ...mapActions([
+        'selectPlay'
+      ])
     },
     watch: {
       scrollY(newY) { // 监听watch偏移量 来设置DOM layer 的偏移量

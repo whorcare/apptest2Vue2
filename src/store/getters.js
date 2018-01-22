@@ -3,7 +3,7 @@ export const singer = state => state.singer // getters获取VUEX state 的 歌�
 
 export const playing = state => state.playing // playing 播放状态 是否在播放中
 
-export const fullScrenn = state => state.fullScrenn // 全屏 展开和收起 播放器
+export const fullScreen = state => state.fullScreen // 全屏 展开和收起 播放器
 
 export const playlist = state => state.playlist
 
