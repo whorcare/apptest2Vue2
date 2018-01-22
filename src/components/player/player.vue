@@ -1,24 +1,91 @@
 <!--此组件放在vue根目录APP.vue下-->
 <template>
   <div class="player" v-show="playlist.length>0">
-    <!--展开的播放器-->
+
+    <!--TODO 展开的播放器-->
     <div class="normal-player" v-show="fullScreen">
-      播放器
+      <div class="background">
+        <img width="100%" height="100%" :src="currentSong.image">
+      </div>
+      <!--头部 歌曲名称歌手名称-->
+      <div class="top">
+        <div class="back" @click="back">
+          <i class="icon-back"></i>
+        </div>
+        <h1 class="title" v-html="currentSong.name"></h1>
+        <h2 class="subtitle" v-html="currentSong.singer"></h2>
+      </div>
+      <!--中部 唱片-->
+      <div class="middle">
+        <div class="middle-l">
+          <div class="cd-wrapper">
+            <div class="cd">
+              <img class="image" :src="currentSong.image">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--底部操作区-->
+      <div class="bottom">
+        <div class="operators">
+          <div class="icon i-left">
+            <i class="icon-sequence"></i>
+          </div>
+          <div class="icon i-left">
+            <i class="icon-prev"></i>
+          </div>
+          <div class="icon i-center">
+            <i class="icon-play"></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon-next"></i>
+          </div>
+          <div class="icon i-right">
+            <i class="icon icon-not-favorite"></i>
+          </div>
+        </div>
+      </div>
     </div>
-    <!--收起后固定在底部的播放器-->
-    <div class="mini-player" v-show="!fullScreen"></div>
+
+    <!--TODO 收起后固定在底部的播放器-->
+    <div class="mini-player" v-show="!fullScreen" @click="open">
+      <div class="icon">
+        <img width="40" height="40" :src="currentSong.image">
+      </div>
+      <div class="text">
+        <h2 class="name" v-html="currentSong.name"></h2>
+        <p class="desc"></p>
+      </div>
+      <div class="control">
+      </div>
+      <div class="control">
+        <i class="icon-playlist"></i>
+      </div>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters} from 'vuex'
+  import {mapGetters, mapMutations} from 'vuex'
 
   export default {
     computed: {
       ...mapGetters([
         'fullScreen',
-        'playlist'
+        'playlist',
+        'currentSong'
       ])
+    },
+    methods: {
+      back() { // 返回上一页
+        this.setFullScreen(false)
+      },
+      open() { // 点击底部播放器 打开大页面播放器
+        this.setFullScreen(true)
+      },
+      ...mapMutations({
+        setFullScreen: 'SET_FULL_SCREEN'
+      })
     }
   }
 </script>
