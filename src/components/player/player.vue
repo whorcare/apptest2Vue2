@@ -3,7 +3,8 @@
   <div class="player" v-show="playlist.length>0">
 
     <!--TODO 展开的播放器-->
-    <div class="normal-player" v-show="fullScreen">
+    <transition name="normal" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave"><!--vue提供的js动画钩子-->
+      <div class="normal-player" v-show="fullScreen">
       <div class="background">
         <img width="100%" height="100%" :src="currentSong.image">
       </div>
@@ -18,7 +19,7 @@
       <!--中部 唱片-->
       <div class="middle">
         <div class="middle-l">
-          <div class="cd-wrapper">
+          <div class="cd-wrapper" ref="cdWrapper">
             <div class="cd">
               <img class="image" :src="currentSong.image">
             </div>
@@ -46,27 +47,34 @@
         </div>
       </div>
     </div>
+    </transition>
 
     <!--TODO 收起后固定在底部的播放器-->
-    <div class="mini-player" v-show="!fullScreen" @click="open">
-      <div class="icon">
-        <img width="40" height="40" :src="currentSong.image">
+    <transition name="mini">
+      <div class="mini-player" v-show="!fullScreen" @click="open">
+        <div class="icon">
+          <img width="40" height="40" :src="currentSong.image">
+        </div>
+        <div class="text">
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc"></p>
+        </div>
+        <div class="control">
+        </div>
+        <div class="control">
+          <i class="icon-playlist"></i>
+        </div>
       </div>
-      <div class="text">
-        <h2 class="name" v-html="currentSong.name"></h2>
-        <p class="desc"></p>
-      </div>
-      <div class="control">
-      </div>
-      <div class="control">
-        <i class="icon-playlist"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex'
+  import animations from 'create-keyframe-animation'
+  import {prefixStyle} from 'common/js/dom'
+
+  const transform = prefixStyle('transform')
 
   export default {
     computed: {
@@ -82,6 +90,62 @@
       },
       open() { // 点击底部播放器 打开大页面播放器
         this.setFullScreen(true)
+      },
+      /** js动画钩子事件 create-keyframe-animation 第三方库 **/
+      enter(el, done) { // el=>DOM done => 动画结束后的回调 自动进入下一个钩子
+        const {x, y, scale} = this._getPosAndScale() // 解构
+
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
+          },
+          60: {
+            transform: `translate3d(0,0,0) scale(1.1)`
+          },
+          100: {
+            transform: `translate3d(0,0,0) scale(1)`
+          }
+        }
+
+        animations.registerAnimation({ // 第三方库自带方法填参数
+          name: 'move',
+          animation,
+          presets: {
+            duration: 400,
+            easing: 'linear'
+          }
+        })
+
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+      },
+      afterEnter() { // 动画完成时将动画删除掉
+        animations.unregisterAnimation('move')
+        this.$refs.cdWrapper.style.animation = ''
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.transition = 'all 0.4s'
+        const {x, y, scale} = this._getPosAndScale()
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+        this.$refs.cdWrapper.addEventListener('transitionend', done)
+      },
+      afterLeave() {
+        this.$refs.cdWrapper.style.transition = ''
+        this.$refs.cdWrapper.style[transform] = ''
+      },
+      _getPosAndScale() { // 获取 底部小圆图唱片 初始位置与缩放比例
+        const targetWidth = 40
+        const paddingLeft = 40
+        const paddingBottom = 30
+        const paddingTop = 80
+        const width = window.innerWidth * 0.8
+        const scale = targetWidth / width
+        const x = -(window.innerWidth / 2 - paddingLeft)
+        const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
+        return {
+          x,
+          y,
+          scale
+        }
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN'
