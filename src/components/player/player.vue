@@ -20,7 +20,7 @@
       <div class="middle">
         <div class="middle-l">
           <div class="cd-wrapper" ref="cdWrapper">
-            <div class="cd">
+            <div class="cd" :class="cdCls">
               <img class="image" :src="currentSong.image">
             </div>
           </div>
@@ -36,7 +36,7 @@
             <i class="icon-prev"></i>
           </div>
           <div class="icon i-center">
-            <i class="icon-play"></i>
+            <i @click="togglePlaying" :class="playIcon"></i>
           </div>
           <div class="icon i-right">
             <i class="icon-next"></i>
@@ -53,13 +53,14 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image">
+          <img :class="cdCls" width="40" height="40" :src="currentSong.image">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc"></p>
         </div>
         <div class="control">
+          <i @click.stop="togglePlaying" :class="miniIcon"></i>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -79,10 +80,20 @@
 
   export default {
     computed: {
+      cdCls() {
+        return this.playing ? 'play' : 'play pause'
+      },
+      playIcon() {
+        return this.playing ? 'icon-pause' : 'icon-play'
+      },
+      miniIcon() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
-        'currentSong'
+        'currentSong',
+        'playing'
       ])
     },
     methods: {
@@ -133,6 +144,9 @@
         this.$refs.cdWrapper.style.transition = ''
         this.$refs.cdWrapper.style[transform] = ''
       },
+      togglePlaying() { // 控制音乐播放暂停
+        this.setPlayingState(!this.playing)
+      },
       _getPosAndScale() { // 获取 底部小圆图唱片 初始位置与缩放比例
         const targetWidth = 40
         const paddingLeft = 40
@@ -149,13 +163,20 @@
         }
       },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN'
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayingState: 'SET_PLAYING_STATE'
       })
     },
     watch: {
       currentSong() { // 监听当前选择播放歌曲
         this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
           this.$refs.audio.play()
+        })
+      },
+      playing(newPlaying) { // 监测playing状态来改变播放器暂停与否
+        this.$nextTick(() => {
+          const audio = this.$refs.audio
+          newPlaying ? audio.play() : audio.pause()
         })
       }
     }
