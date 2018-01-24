@@ -66,6 +66,7 @@
         </div>
       </div>
     </transition>
+    <audio ref="audio" :src="currentSong.url"></audio>
   </div>
 </template>
 
@@ -150,6 +151,13 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN'
       })
+    },
+    watch: {
+      currentSong() { // 监听当前选择播放歌曲
+        this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+          this.$refs.audio.play()
+        })
+      }
     }
   }
 </script>
