@@ -31,7 +31,7 @@
         <div class="progress-wrapper">
           <span class="time time-l">{{format(currentTime)}}</span>
           <div class="progress-bar-wrapper">
-            <progress-bar></progress-bar>
+            <progress-bar :percent="percent"></progress-bar>
           </div>
           <span class="time time-r">{{format(currentSong.duration)}}</span>
         </div>
@@ -105,6 +105,9 @@
       },
       disableCls() { // 图标不可点击状态
         return this.songReady ? '' : 'disable'
+      },
+      percent() { // 偏移比例
+        return this.currentTime / this.currentSong.duration
       },
       ...mapGetters([
         'fullScreen',
