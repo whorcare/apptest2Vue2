@@ -51,6 +51,15 @@
             ret.push(createSong(musicData))
           }
         })
+        /** 更改歌曲 **/
+        for (let i = 0; i < ret.length; i++) {
+          if (i % 2 === 0) {
+            ret[i].url = 'http://dl.stream.qqmusic.qq.com/C400001J5QJL1pRQYB.m4a?vkey=541005AEFD95288DD4EB71C1D49031B9EFFA43B9DACA1A70903A89C7D42A216E237DFFE44FB0315AA7C66664292BD3DBB10027AB1D72949B&guid=1791208910&uin=591686670&fromtag=66'
+          } else {
+            ret[i].url = 'http://dl.stream.qqmusic.qq.com/C400003OUlho2HcRHC.m4a?vkey=001950F47AA01291F5847BBA9318633F48CD0843F5CD641010412063DA6943FB1F39ECFE80B89A77E9B66E99CFDAF8E0436D034EA8CDB147&guid=1791208910&uin=591686670&fromtag=66'
+          }
+        }
+        console.log(ret)
         return ret
       }
     },
