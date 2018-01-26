@@ -28,6 +28,13 @@
       </div>
       <!--底部操作区-->
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{format(currentTime)}}</span>
+          <div class="progress-bar-wrapper">
+            <progress-bar></progress-bar>
+          </div>
+          <span class="time time-r">{{format(currentSong.duration)}}</span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i class="icon-sequence"></i>
@@ -67,7 +74,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updatetime"></audio>
   </div>
 </template>
 
@@ -75,13 +82,15 @@
   import {mapGetters, mapMutations} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
+  import ProgressBar from 'base/progress-bar/progress-bar'
 
   const transform = prefixStyle('transform')
 
   export default {
     data() {
       return {
-        songReady: false // audio播放的标志位
+        songReady: false, // audio播放的标志位
+        currentTime: 0 // 当前播放时间
       }
     },
     computed: {
@@ -193,6 +202,23 @@
       error() {
         this.songReady = true
       },
+      updatetime(e) { // 当前播放时间 e => <audio>
+        this.currentTime = e.target.currentTime
+      },
+      format(interval) { // 时间戳处理函数
+        interval = interval | 0 // 向下取整
+        const minute = interval / 60 | 0
+        const second = this._pad(interval % 60)
+        return `${minute}:${second}`
+      },
+      _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
+        let len = num.toString().length
+        while (len < n) {
+          num = '0' + num
+          len++
+        }
+        return num
+      },
       _getPosAndScale() { // 获取 底部小圆图唱片 初始位置与缩放比例
         const targetWidth = 40
         const paddingLeft = 40
@@ -226,6 +252,9 @@
           newPlaying ? audio.play() : audio.pause()
         })
       }
+    },
+    components: {
+      ProgressBar
     }
   }
 </script>
