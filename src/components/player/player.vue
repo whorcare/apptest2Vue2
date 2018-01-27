@@ -36,8 +36,8 @@
           <span class="time time-r">{{format(currentSong.duration)}}</span>
         </div>
         <div class="operators">
-          <div class="icon i-left">
-            <i class="icon-sequence"></i>
+          <div class="icon i-left" @click="changeMode">
+            <i :class="iconMode"></i>
           </div>
           <div class="icon i-left" :class="disableCls">
             <i @click="prev" class="icon-prev"></i>
@@ -86,6 +86,7 @@
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
+  import {playMode} from 'common/js/config'
 
   const transform = prefixStyle('transform')
 
@@ -104,6 +105,9 @@
       playIcon() {
         return this.playing ? 'icon-pause' : 'icon-play'
       },
+      iconMode() { // 播放模式
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      },
       miniIcon() {
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
       },
@@ -118,7 +122,8 @@
         'playlist',
         'currentSong',
         'playing',
-        'currentIndex'
+        'currentIndex',
+        'mode'
       ])
     },
     methods: {
@@ -224,6 +229,10 @@
           this.togglePlaying()
         }
       },
+      changeMode() { // 改变模式
+        const mode = (this.mode + 1) % 3 // 只有三种状态
+        this.setPlayMode(mode)
+      },
       _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
         let len = num.toString().length
         while (len < n) {
@@ -250,7 +259,8 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayMode: 'SET_PLAY_MODE'
       })
     },
     watch: {
