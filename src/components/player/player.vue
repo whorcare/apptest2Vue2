@@ -87,6 +87,7 @@
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import {playMode} from 'common/js/config'
+  import {shuffle} from 'common/js/util'
 
   const transform = prefixStyle('transform')
 
@@ -123,7 +124,8 @@
         'currentSong',
         'playing',
         'currentIndex',
-        'mode'
+        'mode',
+        'sequenceList' // 正常的顺序列表
       ])
     },
     methods: {
@@ -192,7 +194,7 @@
         if (!this.playing) { // 改变状态
           this.togglePlaying()
         }
-        this.songReady = false
+        this.songReady = true
       },
       prev() {
         if (!this.songReady) {
@@ -206,7 +208,7 @@
         if (!this.playing) {
           this.togglePlaying()
         }
-        this.songReady = false
+        this.songReady = true
       },
       ready() {
         this.songReady = true
@@ -232,6 +234,21 @@
       changeMode() { // 改变模式
         const mode = (this.mode + 1) % 3 // 只有三种状态
         this.setPlayMode(mode)
+        // 改变播放模式 就是 改变播放列表顺序
+        let list = null
+        if (mode === playMode.random) {
+          list = shuffle(this.sequenceList)
+        } else {
+          list = this.sequenceList
+        }
+        this.resetCurrentIndex(list)
+        this.setPlayList(list)
+      },
+      resetCurrentIndex(list) { // 当播放顺序改变时 将当前播放歌曲不变 找到当前歌曲对应的索引 然后改变索引
+        let index = list.findIndex((item) => { // findIndex() 方法返回传入一个测试条件（函数）符合条件的数组第一个元素位置。
+          return item.id === this.currentSong.id
+        })
+        this.setCurrentIndex(index)
       },
       _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
         let len = num.toString().length
@@ -260,11 +277,15 @@
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE'
+        setPlayMode: 'SET_PLAY_MODE',
+        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
-      currentSong() { // 监听当前选择播放歌曲
+      currentSong(newSong, oldSong) { // 监听当前选择播放歌曲
+        if (newSong.id === oldSong.id) {
+          return
+        }
         this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
           this.$refs.audio.play()
         })
