@@ -67,7 +67,9 @@
           <p class="desc"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlaying" :class="miniIcon"></i>
+          <progress-circle :radius="radius" :percent="percent">
+            <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -83,6 +85,7 @@
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
+  import ProgressCircle from 'base/progress-circle/progress-circle'
 
   const transform = prefixStyle('transform')
 
@@ -90,7 +93,8 @@
     data() {
       return {
         songReady: false, // audio播放的标志位
-        currentTime: 0 // 当前播放时间
+        currentTime: 0, // 当前播放时间
+        radius: 32 // 底部播放按钮直径
       }
     },
     computed: {
@@ -263,7 +267,8 @@
       }
     },
     components: {
-      ProgressBar
+      ProgressBar,
+      ProgressCircle
     }
   }
 </script>
