@@ -1,4 +1,7 @@
 /** 封装提取歌手的歌曲详情数据 **/
+import {getLyric} from 'api/song'
+import {ERR_OK} from 'api/config'
+
 // 在类的实例上面调用方法，其实就是调用原型上的方法。
 // class 构造函数 的prototype属性，在 ES6 的“类”上面继续存在。事实上，类的所有方法都定义在类的prototype属性上面。
 export default class Song {
@@ -12,6 +15,15 @@ export default class Song {
     this.duration = duration
     this.image = image
     this.url = url
+  }
+
+  getLyric() {
+    getLyric(this.mid).then((res) => {
+      if (res.retcode === ERR_OK) {
+        this.lyric = res.lyric
+        console.log(this.lyric)
+      }
+    })
   }
 }
 

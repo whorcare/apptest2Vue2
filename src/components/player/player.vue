@@ -299,6 +299,7 @@
         }
         this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
           this.$refs.audio.play()
+          this.currentSong.getLyric()
         })
       },
       playing(newPlaying) { // 监测playing状态来改变播放器暂停与否
