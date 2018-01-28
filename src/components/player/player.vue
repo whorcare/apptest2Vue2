@@ -88,6 +88,7 @@
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
+  import Lyric from 'lyric-parser' // 歌词解析组件 是个class
 
   const transform = prefixStyle('transform')
 
@@ -96,7 +97,8 @@
       return {
         songReady: false, // audio播放的标志位
         currentTime: 0, // 当前播放时间
-        radius: 32 // 底部播放按钮直径
+        radius: 32, // 底部播放按钮直径
+        currentLyric: null // 当前歌曲的歌词
       }
     },
     computed: {
@@ -261,6 +263,12 @@
         })
         this.setCurrentIndex(index)
       },
+      getLyric() { // 歌词解析
+        this.currentSong.getLyric().then((lyric) => {
+          this.currentLyric = new Lyric(lyric)
+          console.log(this.currentLyric)
+        })
+      },
       _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
         let len = num.toString().length
         while (len < n) {
@@ -299,7 +307,7 @@
         }
         this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
           this.$refs.audio.play()
-          this.currentSong.getLyric()
+          this.getLyric()
         })
       },
       playing(newPlaying) { // 监测playing状态来改变播放器暂停与否
