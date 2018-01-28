@@ -51,7 +51,11 @@
         this._triggerPercent()
       },
       progressClick(e) { // 点击进度条（不拖动 只是点击）
-        this._offset(e.offsetX)
+        const rect = this.$refs.progressBar.getBoundingClientRect()
+        const offsetWidth = e.pageX - rect.left
+        this._offset(offsetWidth)
+        // 当我们点击这里 progressBtn 的时候 e.offsetX 获取不对
+        // this._offset(e.offsetX)
         this._triggerPercent()
       },
       _triggerPercent() { // 向外派发事件 告诉外部进度条已被手动改变

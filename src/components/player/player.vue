@@ -76,7 +76,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updatetime"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updatetime" @ended="end"></audio>
   </div>
 </template>
 
@@ -181,6 +181,17 @@
           return
         }
         this.setPlayingState(!this.playing)
+      },
+      end() { // 播放结束时
+        if (this.mode === playMode.loop) {
+          this.loop()
+        } else {
+          this.next()
+        }
+      },
+      loop() { // 播放完成时 循环播放这一首歌
+        this.$refs.audio.currentTime = 0 // 将播放时间变为0
+        this.$refs.audio.play()
       },
       next() {
         if (!this.songReady) {
