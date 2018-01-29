@@ -16,10 +16,10 @@
         <h1 class="title" v-html="currentSong.name"></h1>
         <h2 class="subtitle" v-html="currentSong.singer"></h2>
       </div>
-      <!--中部 唱片 歌词-->
-      <div class="middle">
+      <!-- 中部 唱片 歌词 添加滑动事件可进行切换cd-lyric -->
+      <div class="middle" @touchstart.prevent="middleTouchStart" @touchmove.prevent="middleTouchMove" @touchend.prevent="middleTouchEnd">
         <!--唱片-->
-        <div class="middle-l">
+        <div class="middle-l" ref="middleL">
           <div class="cd-wrapper" ref="cdWrapper">
             <div class="cd" :class="cdCls">
               <img class="image" :src="currentSong.image">
@@ -37,6 +37,12 @@
       </div>
       <!--底部操作区-->
       <div class="bottom">
+        <!--dot-->
+        <div class="dot-wrapper">
+          <span class="dot" :class="{'active':currentShow === 'cd'}"></span>
+          <span class="dot" :class="{'active':currentShow === 'lyric'}"></span>
+        </div>
+        <!--进度条-->
         <div class="progress-wrapper">
           <span class="time time-l">{{format(currentTime)}}</span>
           <div class="progress-bar-wrapper">
@@ -85,7 +91,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updatetime" @ended="end"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
@@ -101,6 +107,7 @@
   import Scroll from 'base/scroll/scroll'
 
   const transform = prefixStyle('transform')
+  const transitionDuration = prefixStyle('transitionDuration') // 规定完成过渡效果需要花费的时间
 
   export default {
     data() {
@@ -109,7 +116,8 @@
         currentTime: 0, // 当前播放时间
         radius: 32, // 底部播放按钮直径
         currentLyric: null, // 当前歌曲的歌词
-        currentLineNum: 0 // 当前应该高亮的歌词
+        currentLineNum: 0, // 当前应该高亮的歌词
+        currentShow: 'cd' // dot 点的class切换
       }
     },
     computed: {
@@ -140,6 +148,9 @@
         'mode',
         'sequenceList' // 正常的顺序列表
       ])
+    },
+    created() {
+      this.touch = {} // 用来关联 cd-lyric 滑动事件的对象
     },
     methods: {
       back() { // 返回上一页
@@ -240,7 +251,7 @@
       error() {
         this.songReady = true
       },
-      updatetime(e) { // 当前播放时间 e => <audio>
+      updateTime(e) { // 当前播放时间 e => <audio>
         this.currentTime = e.target.currentTime
       },
       format(interval) { // 时间戳处理函数
@@ -292,6 +303,60 @@
         } else {
           this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
+      },
+      /** 滑动事件  cd 滑动至 歌词 **/
+      middleTouchStart(e) {
+        this.touch.initiated = true // 标志位
+        const touches = e.touches[0]
+        this.touch.startX = touches.pageX
+        this.touch.startY = touches.pageY
+      },
+      middleTouchMove(e) {
+        if (!this.touch.initiated) {
+          return
+        }
+        const touch = e.touches[0]
+        const deltaX = touch.pageX - this.touch.startX
+        const deltaY = touch.pageY - this.touch.startY
+        if (Math.abs(deltaY) > Math.abs(deltaX)) { // 当纵轴偏移大于横轴偏移(scroll) 就不该移动
+          return
+        }
+        // 歌词在右边时的最左边border 距离屏幕右边的距离是 0 歌词显示时 距离屏幕右边距离是-window.innerWidth（屏幕宽度）
+        const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
+        const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX)) // 0 到 负值 之间
+        this.touch.percent = Math.abs(offsetWidth / window.innerWidth) // 偏移量
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+        this.$refs.lyricList.$el.style[transitionDuration] = 0
+        this.$refs.middleL.style.opacity = 1 - this.touch.percent
+        this.$refs.middleL.style[transitionDuration] = 0
+      },
+      middleTouchEnd(e) { // 滑动结束后决定停在哪个位置 只划10%就可以切换
+        let offsetWidth
+        let opacity
+        if (this.currentShow === 'cd') {
+          if (this.touch.percent > 0.1) {
+            offsetWidth = -window.innerWidth
+            opacity = 0
+            this.currentShow = 'lyric'
+          } else {
+            offsetWidth = 0
+            opacity = 1
+          }
+        } else {
+          if (this.touch.percent < 0.9) {
+            offsetWidth = 0
+            this.currentShow = 'cd'
+            opacity = 1
+          } else {
+            offsetWidth = -window.innerWidth
+            opacity = 0
+          }
+        }
+        const time = 300
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+        this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+        this.$refs.middleL.style.opacity = opacity
+        this.$refs.middleL.style[transitionDuration] = `${time}ms`
       },
       _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
         let len = num.toString().length
