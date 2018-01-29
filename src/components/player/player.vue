@@ -16,8 +16,9 @@
         <h1 class="title" v-html="currentSong.name"></h1>
         <h2 class="subtitle" v-html="currentSong.singer"></h2>
       </div>
-      <!--中部 唱片-->
+      <!--中部 唱片 歌词-->
       <div class="middle">
+        <!--唱片-->
         <div class="middle-l">
           <div class="cd-wrapper" ref="cdWrapper">
             <div class="cd" :class="cdCls">
@@ -25,6 +26,14 @@
             </div>
           </div>
         </div>
+        <!--歌词 currentLyric && currentLyric.lines currentLyric不为null时 再加载 currentLyric.lines -->
+        <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+          <div class="lyric-wrapper">
+            <div v-if="currentLyric">
+              <p ref="lyricLine" class="text" :class="{'current':currentLineNum === index}" v-for="(line, index) in currentLyric.lines">{{line.txt}}</p>
+            </div>
+          </div>
+        </scroll>
       </div>
       <!--底部操作区-->
       <div class="bottom">
@@ -89,6 +98,7 @@
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
   import Lyric from 'lyric-parser' // 歌词解析组件 是个class
+  import Scroll from 'base/scroll/scroll'
 
   const transform = prefixStyle('transform')
 
@@ -98,7 +108,8 @@
         songReady: false, // audio播放的标志位
         currentTime: 0, // 当前播放时间
         radius: 32, // 底部播放按钮直径
-        currentLyric: null // 当前歌曲的歌词
+        currentLyric: null, // 当前歌曲的歌词
+        currentLineNum: 0 // 当前应该高亮的歌词
       }
     },
     computed: {
@@ -265,9 +276,22 @@
       },
       getLyric() { // 歌词解析
         this.currentSong.getLyric().then((lyric) => {
-          this.currentLyric = new Lyric(lyric)
+          this.currentLyric = new Lyric(lyric, this.handleLyric) // 回调函数=>this.handleLyric
+          if (this.playing) {
+            this.currentLyric.play() // ??? this.currentLyric是个对象 如何调用play
+          }
           console.log(this.currentLyric)
         })
+      },
+      handleLyric({lineNum, txt}) { // 回调函数 当歌词每一行发生改变时就回调一下 组件内置方法 lineNum=>行数
+        this.currentLineNum = lineNum
+        // 当歌词高亮位置大于5行时进行歌词居中操作
+        if (lineNum > 5) {
+          let lineEl = this.$refs.lyricLine[lineNum - 5] // lineEl=>居中一行的DOM lyricLine=>一堆p标签的DOM
+          this.$refs.lyricList.scrollToElement(lineEl, 1000)
+        } else {
+          this.$refs.lyricList.scrollTo(0, 0, 1000)
+        }
       },
       _pad(num, n = 2) { // 对时间00:01进行补0的方法 n => 补成几位
         let len = num.toString().length
@@ -319,7 +343,8 @@
     },
     components: {
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Scroll
     }
   }
 </script>
