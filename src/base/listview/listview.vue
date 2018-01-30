@@ -94,6 +94,9 @@
 
         this._scrollTo(anchorIndex)
       },
+      refresh() { // 刷新scroll高度
+        this.$refs.listview.refresh()
+      },
       scroll(pos) { // 为接收scroll组件传出来的事件  pos => better-scroll 传出的数据
         this.scrollY = pos.y
       },

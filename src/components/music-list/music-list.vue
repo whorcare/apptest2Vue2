@@ -34,6 +34,7 @@
   import Loading from 'base/loading/loading'
   import {prefixStyle} from 'common/js/dom'
   import {mapActions} from 'vuex'
+  import {playlistMixin} from 'common/js/mixin'
 
   const RESERVED_HEIGHT = 40 // 顶部title高度
   // 返回拼接好的css属性名
@@ -41,6 +42,7 @@
   const backdrop = prefixStyle('backdrop-filter')
 
   export default {
+    mixins: [playlistMixin],
     props: {
       bgImage: { // 背景图
         type: String,
@@ -75,6 +77,11 @@
       this.$refs.list.$el.style.top = `${this.imageHeight}px` // ??? 将scroll组件top值改写 让scroll组件上方的bgImage出现
     },
     methods: {
+      handlePlaylist(playlist) { // mixins底部方法
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.list.$el.style.bottom = bottom // scroll内置方法
+        this.$refs.list.refresh()
+      },
       scroll(pos) { // 接收scroll的监听事件
         this.scrollY = pos.y
       },

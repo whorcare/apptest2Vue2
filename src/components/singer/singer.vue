@@ -1,6 +1,6 @@
 <template>
-  <div class="singer">
-    <list-view :data="singers" @select="selectSinger"></list-view>
+  <div class="singer" ref="singer">
+    <list-view :data="singers" @select="selectSinger" ref="list"></list-view>
     <router-view></router-view>
   </div>
 </template>
@@ -11,11 +11,13 @@
   import Singer from 'common/js/singer'
   import ListView from 'base/listview/listview'
   import {mapMutations} from 'vuex' // vuex 语法糖 改变数据
+  import {playlistMixin} from 'common/js/mixin'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LEN = 10
 
   export default {
+    mixins: [playlistMixin],
     data() {
       return {
         singers: []
@@ -25,6 +27,11 @@
       this._getSingerList()
     },
     methods: {
+      handlePlaylist(playlist) { // mixins底部方法
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.singer.style.bottom = bottom
+        this.$refs.list.refresh() // 调用list-view组件内的自己写的方法
+      },
       selectSinger(singer) { // 跳转至歌曲详情页
         this.$router.push({ // 跳转 并传入router中 singer.id  路由跳转实际上并没有换一个新页面 只是盖上一个层
           path: `/singer/${singer.id}`

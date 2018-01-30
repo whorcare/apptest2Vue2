@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <scroll ref="scroll" class="recommend-content" :data="discList">
       <div>
         <!-- 用 v-if 先将数据加载完成后再加载DOM-->
@@ -42,8 +42,10 @@
   import Slider from 'base/slider/slider'
   import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
+  import {playlistMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playlistMixin],
     data() {
       return {
         recommends: [], // 轮播图数据
@@ -55,6 +57,11 @@
       this._getDiscList()
     },
     methods: {
+      handlePlaylist(playlist) { // mixins底部方法
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.recommend.style.bottom = bottom // scroll内置方法
+        this.$refs.scroll.refresh()
+      },
       _getRecommend() { // 获取轮播图数据
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
