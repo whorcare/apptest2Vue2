@@ -25,6 +25,10 @@
               <img class="image" :src="currentSong.image">
             </div>
           </div>
+          <!--单行歌词-->
+          <div class="playing-lyric-wrapper">
+            <div class="playing-lyric">{{playingLyric}}</div>
+          </div>
         </div>
         <!--歌词 currentLyric && currentLyric.lines currentLyric不为null时 再加载 currentLyric.lines -->
         <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
@@ -117,7 +121,8 @@
         radius: 32, // 底部播放按钮直径
         currentLyric: null, // 当前歌曲的歌词
         currentLineNum: 0, // 当前应该高亮的歌词
-        currentShow: 'cd' // dot 点的class切换
+        currentShow: 'cd', // dot 点的class切换
+        playingLyric: '' // 单行歌词
       }
     },
     computed: {
@@ -205,6 +210,9 @@
           return
         }
         this.setPlayingState(!this.playing)
+        if (this.currentLyric) { // 暂停时歌词播放也暂停
+          this.currentLyric.togglePlay() // 歌词自带方法
+        }
       },
       end() { // 播放结束时
         if (this.mode === playMode.loop) {
@@ -216,6 +224,9 @@
       loop() { // 播放完成时 循环播放这一首歌
         this.$refs.audio.currentTime = 0 // 将播放时间变为0
         this.$refs.audio.play()
+        if (this.currentLyric) { // 单曲循环时 歌词回到顶部 自带方法
+          this.currentLyric.seek()
+        }
       },
       next() {
         if (!this.songReady) {
@@ -261,9 +272,13 @@
         return `${minute}:${second}`
       },
       onProgressBarChange(percent) { // 手动拖动进度条改变时
-        this.$refs.audio.currentTime = this.currentSong.duration * percent // 直接改变dom audio
+        const currentTime = this.currentSong.duration * percent
+        this.$refs.audio.currentTime = currentTime // 直接改变dom audio
         if (!this.playing) {
           this.togglePlaying()
+        }
+        if (this.currentLyric) { // 歌词随着进度条拖动改变
+          this.currentLyric.seek(currentTime * 1000)
         }
       },
       changeMode() { // 改变模式
@@ -291,7 +306,10 @@
           if (this.playing) {
             this.currentLyric.play() // ??? this.currentLyric是个对象 如何调用play
           }
-          console.log(this.currentLyric)
+        }).catch(() => { // 出现错误时清理
+          this.currentLyric = null
+          this.playingLyric = ''
+          this.currentLineNum = 0
         })
       },
       handleLyric({lineNum, txt}) { // 回调函数 当歌词每一行发生改变时就回调一下 组件内置方法 lineNum=>行数
@@ -303,6 +321,7 @@
         } else {
           this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
+        this.playingLyric = txt
       },
       /** 滑动事件  cd 滑动至 歌词 **/
       middleTouchStart(e) {
@@ -393,6 +412,9 @@
       currentSong(newSong, oldSong) { // 监听当前选择播放歌曲
         if (newSong.id === oldSong.id) {
           return
+        }
+        if (this.currentLyric) { // 解决切换歌曲时歌词跳的问题
+          this.currentLyric.stop()
         }
         this.$nextTick(() => { // $nextTick 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
           this.$refs.audio.play()
