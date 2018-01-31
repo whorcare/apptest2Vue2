@@ -16,3 +16,5 @@ export const currentIndex = state => state.currentIndex
 export const currentSong = (state) => { // state中没有  通过getters中计算得出currentSong 当前播放的歌曲
   return state.playlist[state.currentIndex] || {} // 如果没有则是空对象
 }
+
+export const disc = state => state.disc // 歌单详情
