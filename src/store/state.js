@@ -10,7 +10,8 @@ const state = {
   sequenceList: [], // 正常的顺序列表
   mode: playMode.sequence, // 播放模式 引入常量 sequence=>0正序播放  loop=>1循环播放  random=>2随机播放
   currentIndex: -1, // 当前播放的歌曲index
-  disc: {} // 歌单
+  disc: {}, // 歌单
+  topList: {} // 榜单详情数据
 }
 
 export default state
