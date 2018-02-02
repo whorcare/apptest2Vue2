@@ -51,7 +51,7 @@ export function createSong(musicData) { // 创建自己的歌曲数据 利用上
   })
 }
 
-function filterSinger(singer) { // 拼接字符串变量 singer => [] 将歌名/专辑 拼接一起
+export function filterSinger(singer) { // 拼接字符串变量 singer => [] 将歌名/专辑 拼接一起
   let ret = []
   if (!singer) {
     return ''

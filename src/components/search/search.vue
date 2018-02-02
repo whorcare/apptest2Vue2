@@ -3,9 +3,9 @@
   <div class="search">
     <div class="search-box-wrapper">
       <!--搜索组件-->
-      <search-box ref="searchBox"></search-box>
+      <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div class="shortcut-wrapper">
+    <div class="shortcut-wrapper" v-show="!query">
       <div class="shortcut">
         <div class="hot-key">
           <h1 class="title">热门搜索</h1>
@@ -17,6 +17,10 @@
         </div>
       </div>
     </div>
+    <div class="search-result" v-show="query">
+      <!--搜索时 进行搜索功能下拉菜单显示-->
+      <suggest :query="query"></suggest>
+    </div>
   </div>
 </template>
 
@@ -24,6 +28,7 @@
   import SearchBox from 'base/search-box/search-box'
   import {getHotKey} from 'api/search'
   import {ERR_OK} from 'api/config'
+  import Suggest from 'components/suggest/suggest'
 
   export default {
     created() {
@@ -31,12 +36,16 @@
     },
     data() {
       return {
-        hotKey: []
+        hotKey: [],
+        query: ''
       }
     },
     methods: {
       addQuery(query) { // 点击 将热门搜索内容填充到搜索框中
         this.$refs.searchBox.setQuery(query) // 调用子组件内的方法!impotent
+      },
+      onQueryChange(query) { // 监听组件内的query改变
+        this.query = query
       },
       _getHotKey() { // 获取热门数据
         getHotKey().then((res) => {
@@ -47,7 +56,8 @@
       }
     },
     components: {
-      SearchBox
+      SearchBox,
+      Suggest
     }
   }
 </script>
