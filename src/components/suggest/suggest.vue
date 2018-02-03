@@ -10,6 +10,7 @@
           <p class="text" v-html="getDisplayName(item)"></p>
         </div>
       </li>
+      <loading v-show="hasMore" title=""></loading>
     </ul>
   </scroll>
 </template>
@@ -19,6 +20,7 @@
   import {ERR_OK} from 'api/config'
   import {createSong} from 'common/js/song' // 实例化 类
   import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
 
   const TYPE_SINGER = 'singer'
   const perpage = 20 // 一次加载数据量
@@ -110,7 +112,8 @@
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
