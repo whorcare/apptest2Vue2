@@ -28,6 +28,10 @@
       pullup: { // 是否开启上拉刷新
         type: Boolean,
         default: false
+      },
+      pullDown: { // 是否开启下拉刷新 自写
+        type: Boolean,
+        default: false
       }
     },
     mounted() { // 当组件ready钩子
@@ -56,6 +60,14 @@
           this.scroll.on('scrollEnd', () => {
             if (this.scroll.y <= (this.scroll.maxScrollY + 50)) { // 如果小于这个值则快滚动到底部了
               this.$emit('scrollToEnd') // 向外派发 滚动到底部 事件
+            }
+          })
+        }
+
+        if (this.pullDown) { // 如果需要开启下拉刷新功能
+          this.scroll.on('scrollEnd', () => {
+            if (this.scroll.y === 0) {
+              this.$emit('scrollToEndDown')
             }
           })
         }

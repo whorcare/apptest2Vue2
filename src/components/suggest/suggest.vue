@@ -1,7 +1,10 @@
 <!--搜索时 进行搜索功能下拉菜单显示-->
 <template>
-  <scroll ref="suggest" class="suggest" :data="result" :pullup="pullup" @scrollToEnd="searchMore">
+  <scroll ref="suggest" class="suggest" :data="result" :pullup="pullup" :pullDown="pullDown"
+          @scrollToEnd="searchMore" @scrollToEndDown="searchDown"
+  >
     <ul class="suggest-list">
+      <loading v-show="nowDown" title=""></loading>
       <li class="suggest-item" v-for="item in result">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
@@ -41,20 +44,25 @@
         page: 1,
         result: [], // 接收请求返回的数据
         pullup: true,
-        hasMore: true // 是否还有更多数据
+        hasMore: true, // 是否还有更多数据
+        pullDown: true, // 是否开启下拽刷新数据
+        nowDown: false // 是否在下拽过程中
       }
     },
     methods: {
       search() { // 数据变化时 请求服务端数据
+        this.page = 1
         this.hasMore = true
+        this.$refs.suggest.scrollTo(0, 0)
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
           if (res.code === ERR_OK) {
             this.result = this._genResult(res.data)
             this._checkMore(res.data) // 是否有更多的数据可以加载
+            this.nowDown = false
           }
         })
       },
-      searchMore() { // 下拉刷新时搜索更多
+      searchMore() { // 上拉刷新时搜索更多
         if (!this.hasMore) { // 如果没有更多数据
           return
         }
@@ -65,6 +73,10 @@
             this._checkMore(res.data) // 是否有更多的数据可以加载
           }
         })
+      },
+      searchDown() { // 下拽事件
+        this.nowDown = true
+        this.search()
       },
       getIconCls(item) { // 改变图片class
         if (item.type === TYPE_SINGER) {
