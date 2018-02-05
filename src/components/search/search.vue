@@ -21,6 +21,7 @@
       <!--搜索时 进行搜索功能下拉菜单显示-->
       <suggest :query="query"></suggest>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 

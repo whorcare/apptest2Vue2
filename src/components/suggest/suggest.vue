@@ -5,7 +5,7 @@
   >
     <ul class="suggest-list">
       <loading v-show="nowDown" title=""></loading>
-      <li class="suggest-item" v-for="item in result">
+      <li @click="selectItem(item)" class="suggest-item" v-for="item in result">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
         </div>
@@ -24,6 +24,8 @@
   import {createSong} from 'common/js/song' // 实例化 类
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
+  import Singer from 'common/js/singer'
+  import {mapMutations} from 'vuex'
 
   const TYPE_SINGER = 'singer'
   const perpage = 20 // 一次加载数据量
@@ -92,6 +94,18 @@
           return `${item.name}-${item.singer}`
         }
       },
+      selectItem(item) { // 点击事件
+        if (item.type === TYPE_SINGER) { // 如果点击的是歌手 那么跳转歌手详情页
+          const singer = new Singer({
+            id: item.singermid,
+            name: item.singernaem
+          })
+          this.$router.push({
+            path: `/search/${singer.id}`
+          })
+          this.setSinger(singer)
+        }
+      },
       _checkMore(data) { // 判断是否有更多的数据可以加载
         const song = data.song
         if (!song.list.length || (song.curnum + song.curpage * perpage) > song.totalnum) {
@@ -116,7 +130,10 @@
           }
         })
         return ret
-      }
+      },
+      ...mapMutations({
+        setSinger: 'SET_SINGER'
+      })
     },
     watch: {
       query() {
